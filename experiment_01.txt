@@ -1,0 +1,111 @@
+create table publisher
+(
+pub_name varchar2(20) primary key,
+phone number(10),
+address varchar2(20)
+);
+create table book
+(
+book_id number(5) primary key,
+title varchar2(20),
+pub_year varchar2(20),
+pub_name varchar2(20),
+foreign key(pub_name) references publisher(pub_name) on delete cascade
+);
+create table book_authors
+(
+author_name varchar2(20),
+book_id number(5),
+foreign key(book_id) references book(book_id) on delete cascade, 
+primary key(book_id, author_name)
+);
+create table library_programme
+(
+programme_id number(5) primary key,
+programme_name varchar2(20),
+address varchar2(20)
+);
+create table card
+(
+card_no number(5) primary key
+);
+create table book_copies
+(
+no_of_copies number(5),
+book_id number(5),
+programme_id number(5),
+foreign key(book_id) references book(book_id) on delete cascade,
+foreign key(programme_id) references library_programme(programme_id) on delete cascade,
+primary key (book_id, programme_id)
+);
+create table book_lending
+(
+date_out date,
+due_date date,
+book_id number(5),
+programme_id number(5),
+card_no number(5),
+foreign key(book_id) references book(book_id) on delete cascade,
+foreign key(programme_id) references library_programme(programme_id) on delete cascade,
+foreign key(card_no) references card(card_no) on delete cascade, 
+primary key (book_id, programme_id, card_no)
+);
+
+insert into publisher values ('mcgraw-hill', 9989076587, 'bangalore');
+insert into publisher values ('pearson', 9889076565, 'newdelhi');
+insert into publisher values ('random house', 7455679345, 'hydrabad');
+insert into publisher values ('hachette livre', 8970862340, 'chenai');
+insert into publisher values ('grupo planeta', 7756120238, 'bangalore');
+insert into book values (1,'dbms','jan-2017', 'mcgraw-hill'); 
+insert into book values (2,'adbms','jun-2016', 'mcgraw-hill'); 
+insert into book values (3,'cn','sep-2016', 'pearson');
+insert into book values (4,'cg','sep-2015', 'grupo planeta');
+insert into book values (5,'os','may-2016', 'pearson');
+insert into book_authors values ('navathe', 1); 
+insert into book_authors values ('navathe', 2);
+insert into book_authors values ('tanenbaum', 3); 
+insert into book_authors values ('edward angel', 4);
+insert into book_authors values ('galvin', 5);
+insert into library_programme values (10,'rr nagar','bangalore');
+insert into library_programme values (11,'rnsit','bangalore');
+insert into library_programme values (12,'rajaji nagar', 'bangalore');
+insert into library_programme values (13,'nitte','mangalore');
+insert into library_programme values (14,'manipal','udupi');
+insert into card values (100);
+insert into card values (101);
+insert into card values (102);
+insert into card values (103);
+insert into card values (104);
+insert into book_copies values (10, 1, 10);
+insert into book_copies values (5, 1, 11);
+insert into book_copies values (2, 2, 12);
+insert into book_copies values (5, 2, 13);
+insert into book_copies values (7, 3, 14);
+insert into book_lending values ('01-jan-17','01-jun-17', 1, 10, 101);
+insert into book_lending values ('11-jan-17','11-mar-17', 3, 14, 101);
+insert into book_lending values ('21-feb-17','21-apr-17', 2, 13, 101);
+insert into book_lending values ('15-mar-17','15-jul-17', 4, 11, 101);
+insert into book_lending values ('12-apr-17','12-may-17', 1, 11, 104);
+
+
+select b.book_id, b.title, b.pub_name, a.author_name, c.no_of_copies, l.programme_id
+from book b, book_authors a, book_copies c, library_programme l 
+where b.book_id=a.book_id and b.book_id=c.book_id and l.programme_id=c.programme_id;
+
+select card_no 
+from book_lending
+where date_out between ’01-jan-2017’ and ’01-jul-2017’
+group by card_no 
+having count (*)>3;
+
+delete from book
+where book_id=3;
+
+create view v_publications as
+select pub_year
+from book;
+
+create view v_books as
+select b.book_id, b.title, c.no_of_copies
+from book b, book_copies c, library_programme l
+where b.book_id=c.book_id and c.programme_id=l.programme_id;
